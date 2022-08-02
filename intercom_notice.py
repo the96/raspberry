@@ -16,6 +16,10 @@ def check_image(gray1, gray2, gray3):
     return diff_wb
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+cap.set(cv2.CAP_PROP_AUTO_WB, 0)
+cap.set(cv2.CAP_PROP_FOCUS, 0)
 r, img = cap.read()
 img1  = img2  = img3  = img
 gray1 = gray2 = gray3 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
@@ -66,29 +70,31 @@ try:
 
             path_base = '/home/the96/intercome_log/image/' + now.strftime('%Y-%m-%d-%H-%M-%S-%f')
             log_1 = path_base + '_1.jpg'
-            cv2.imwrite(path, cv2.flip(img1, -1))
+            cv2.imwrite(log_1, cv2.flip(img1, -1))
 
             log_2 = path_base + '_2.jpg'
-            cv2.imwrite(path, cv2.flip(img2, -1))
+            cv2.imwrite(log_2, cv2.flip(img2, -1))
 
             log_3 = path_base + '_3.jpg'
-            cv2.imwrite(path, cv2.flip(img3, -1))
+            cv2.imwrite(log_3, cv2.flip(img3, -1))
             
-            log_img = path_base + '.jpg'
-            cv2.imwrite(path, cv2.flip(log_img, -1))
+            slack_img = path_base + '.jpg'
+            cv2.imwrite(slack_img, cv2.flip(log_img, -1))
 
-            files = {'file': open(path, 'rb')}
+            files = {'file': open(slack_img, 'rb')}
             param = {
                 'token': token, 
                 'channels': 'C03R7TA1Y4A',
                 'filename': 'intercome log',
                 'initial_comment': '',
-                'title': 'intercome log '+ now.strftime('%Y-%m-%dT%H:%M:%S')
+                'title': 'intercome log '+ now.strftime('%Y-%m-%dT%H:%M:%S') + '.jpg'
             }
             result = requests.post(url="https://slack.com/api/files.upload", params=param, files=files)
             write_log(json.dumps(result.json()))
             time.sleep(30)
-        time.sleep(1)
+            img1  = img2  = img3  = img
+            gray1 = gray2 = gray3 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+        time.sleep(0.3)
 except:
     write_log(traceback.format_exc())
     requests.post('https://slack.com/api/chat.postMessage', params={
